@@ -59,7 +59,7 @@ var config = {
         }
     },
     autoprefixer: {
-        default: [
+        def: [
             'last 2 version',
             '> 1%',
             'safari 5',
@@ -100,7 +100,7 @@ gulp.task('sass', function() {
             includePaths: folders.sassIncludePaths,
             outputStyle: 'expanded'
         }))
-        .pipe(autoprefixer.apply(config.autoprefixer.default))
+        .pipe(autoprefixer.apply(config.autoprefixer.def))
         .pipe(gulp.dest(folders.tmp + '/assets/css'))
         .pipe(size());
 });
@@ -115,7 +115,7 @@ gulp.task('stylus', function() {
             use: ['nib'],
             import: ['nib']
         }))
-        .pipe(autoprefixer.apply(config.autoprefixer.default))
+        .pipe(autoprefixer.apply(config.autoprefixer.def))
         .pipe(gulp.dest(folders.tmp + '/assets/css'));
 });
 

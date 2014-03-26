@@ -70,7 +70,6 @@ var config = {
             'android 4'
         ],
         mobile: [
-            'last 1 version',
             'ios 6',
             'android 4'
         ]

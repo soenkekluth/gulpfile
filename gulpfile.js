@@ -58,16 +58,23 @@ var config = {
             exports: '$'
         }
     },
-    autoprefixer: [
-        'last 2 version',
-        '> 1%',
-        'safari 5',
-        'ie 8',
-        'ie 9',
-        'opera 12.1',
-        'ios 6',
-        'android 4'
-    ]
+    autoprefixer: {
+        default: [
+            'last 2 version',
+            '> 1%',
+            'safari 5',
+            'ie 8',
+            'ie 9',
+            'opera 12.1',
+            'ios 6',
+            'android 4'
+        ],
+        mobile: [
+            'last 1 version',
+            'ios 6',
+            'android 4'
+        ]
+    }
 };
 
 
@@ -94,7 +101,7 @@ gulp.task('sass', function() {
             includePaths: folders.sassIncludePaths,
             outputStyle: 'expanded'
         }))
-        .pipe(autoprefixer.apply(config.autoprefixer))
+        .pipe(autoprefixer.apply(config.autoprefixer.default))
         .pipe(gulp.dest(folders.tmp + '/assets/css'))
         .pipe(size());
 });
@@ -109,7 +116,7 @@ gulp.task('stylus', function() {
             use: ['nib'],
             import: ['nib']
         }))
-        .pipe(autoprefixer.apply(config.autoprefixer))
+        .pipe(autoprefixer.apply(config.autoprefixer.default))
         .pipe(gulp.dest(folders.tmp + '/assets/css'));
 });
 
@@ -211,7 +218,7 @@ gulp.task('connect', connect.server({
 
 
 // Browser-Sync
-gulp.task('browser-sync', function() {
+gulp.task('browsersync', function() {
     browserSync.init([folders.tmp + '/assets/css', folders.tmp + '/assets/js']);
     /*, {
         proxy: {
@@ -265,6 +272,9 @@ gulp.task('watch', ['default', 'connect'], function() {
 
     // Watch .scss files
     gulp.watch(folders.src + '/assets/scss/**/*.scss', ['sass']);
+
+    // Watch .stylus files
+    gulp.watch(folders.src + '/assets/stylus/**/*.stylus', ['stylus']);
 
     // Watch .js files
     gulp.watch(folders.src + '/assets/js/**/*.js', ['js']);

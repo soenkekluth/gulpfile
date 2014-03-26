@@ -12,6 +12,7 @@
 var gulp = require('gulp'),
     gutil = require('gulp-util'),
     sass = require('gulp-sass'),
+    stylus = require('gulp-stylus'),
     uglify = require('gulp-uglify'),
     jshint = require('gulp-jshint'),
     rename = require('gulp-rename'),
@@ -24,6 +25,7 @@ var gulp = require('gulp'),
     browserSync = require('browser-sync'),
     autoprefixer = require('gulp-autoprefixer'),
     minifycss = require('gulp-minify-css'),
+    minifyHTML = require('gulp-minify-html'),
     imagemin = require('gulp-imagemin'),
     clean = require('gulp-clean'),
     connect = require('gulp-connect'),
@@ -55,7 +57,17 @@ var config = {
             path: folders.bower + '/jquery/dist/jquery.js',
             exports: '$'
         }
-    }
+    },
+    autoprefixer: [
+        'last 2 version',
+        '> 1%',
+        'safari 5',
+        'ie 8',
+        'ie 9',
+        'opera 12.1',
+        'ios 6',
+        'android 4'
+    ]
 };
 
 
@@ -72,7 +84,7 @@ gulp.task('clean', function() {
 
 
 /*******************************************************************************
-    SASS TASK
+    CSS TASK
 *******************************************************************************/
 
 gulp.task('sass', function() {
@@ -82,20 +94,24 @@ gulp.task('sass', function() {
             includePaths: folders.sassIncludePaths,
             outputStyle: 'expanded'
         }))
-        .pipe(autoprefixer(
-            'last 2 version',
-            '> 1%',
-            'safari 5',
-            'ie 8',
-            'ie 9',
-            'opera 12.1',
-            'ios 6',
-            'android 4'
-        ))
+        .pipe(autoprefixer.apply(config.autoprefixer))
         .pipe(gulp.dest(folders.tmp + '/assets/css'))
         .pipe(size());
 });
 
+
+
+
+gulp.task('stylus', function() {
+    gulp.src(folders.src + '/assets/stylus/*.styl')
+        .pipe(stylus({
+            // set:['compress','linenos'],
+            use: ['nib'],
+            import: ['nib']
+        }))
+        .pipe(autoprefixer.apply(config.autoprefixer))
+        .pipe(gulp.dest(folders.tmp + '/assets/css'));
+});
 
 /*******************************************************************************
     JAVASCRIPT TASK
@@ -223,7 +239,11 @@ gulp.task('build', ['clean', 'default'], function() {
 
     gulp.src(folders.tmp + '/assets/css/**/*.css')
         .pipe(minifycss())
-        .pipe(gulp.dest(folders.dest + '/assets/css'))
+        .pipe(gulp.dest(folders.dest + '/assets/css'));
+
+    gulp.src(folders.tmp + '/**/*.html')
+        .pipe(minifyHTML())
+        .pipe(gulp.dest(folders.dest))
         .pipe(notify('Build successfull'));
 });
 

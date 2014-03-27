@@ -12,6 +12,7 @@
 var gulp = require('gulp'),
     gutil = require('gulp-util'),
     sass = require('gulp-sass'),
+    compass = require('gulp-compass'),
     stylus = require('gulp-stylus'),
     uglify = require('gulp-uglify'),
     jshint = require('gulp-jshint'),
@@ -24,7 +25,7 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     browserSync = require('browser-sync'),
     autoprefixer = require('gulp-autoprefixer'),
-    minifycss = require('gulp-minify-css'),
+    minifyCSS = require('gulp-minify-css'),
     minifyHTML = require('gulp-minify-html'),
     imagemin = require('gulp-imagemin'),
     clean = require('gulp-clean'),
@@ -32,6 +33,7 @@ var gulp = require('gulp'),
     browserify = require('gulp-browserify'),
     rjs = require('gulp-requirejs'),
     cache = require('gulp-cache'),
+    jeet = require("jeet"),
     size = require('gulp-size');
 
 
@@ -94,7 +96,7 @@ gulp.task('clean', function() {
 *******************************************************************************/
 
 gulp.task('sass', function() {
-    return gulp.src(folders.src + '/assets/scss/style.scss')
+    return gulp.src(folders.src + '/assets/scss/style.scss', { read: false })
         .pipe(plumber())
         .pipe(sass({
             includePaths: folders.sassIncludePaths,
@@ -106,14 +108,32 @@ gulp.task('sass', function() {
 });
 
 
+gulp.task('compass', function() {
+    return gulp.src(folders.src + '/assets/scss/*.{scss,sass}')
+        .pipe(plumber())
+        .pipe(compass({
+            // css: folders.src + '/assets/css',
+            css: folders.tmp + '/assets/css',
+            sass: folders.src + '/assets/scss',
+            image: folders.src + '/assets/images',
+            javascripts: folders.src + '/assets/js',
+            fonts: folders.src + '/assets/fonts',
+            import_path: folders.sassIncludePaths
+            /*,
+            require: ['susy', 'modular-scale']*/
+        }))
+        .pipe(autoprefixer.apply(config.autoprefixer.def))
+        .pipe(gulp.dest(folders.tmp + '/assets/css'));
+});
 
 
 gulp.task('stylus', function() {
     gulp.src(folders.src + '/assets/stylus/*.styl')
+        .pipe(plumber())
         .pipe(stylus({
             // set:['compress','linenos'],
-            use: ['nib'],
-            import: ['nib']
+            use: ['nib', 'jeet'],
+            import: ['nib', 'jeet']
         }))
         .pipe(autoprefixer.apply(config.autoprefixer.def))
         .pipe(gulp.dest(folders.tmp + '/assets/css'));
@@ -131,6 +151,7 @@ gulp.task('jshint', function() {
 
 gulp.task('js', function() {
     return gulp.src(folders.src + '/assets/js/main.js')
+        .pipe(plumber())
         .pipe(browserify({
             insertGlobals: false,
             debug: true,
@@ -244,10 +265,10 @@ gulp.task('build', ['clean', 'default'], function() {
         .pipe(gulp.dest(folders.dest + '/assets/js'));
 
     gulp.src(folders.tmp + '/assets/css/**/*.css')
-        .pipe(minifycss())
+        .pipe(minifyCSS())
         .pipe(gulp.dest(folders.dest + '/assets/css'));
 
-    gulp.src(folders.tmp + '/**/*.html')
+    gulp.src(folders.tmp + '/**/*.{html,shtml,php,xml,json}')
         .pipe(minifyHTML())
         .pipe(gulp.dest(folders.dest))
         .pipe(notify('Build successfull'));
@@ -260,7 +281,7 @@ gulp.task('build', ['clean', 'default'], function() {
 gulp.task('watch', ['default', 'connect'], function() {
     // Watch for changes in `app` folder
     gulp.watch([
-        folders.tmp + '/**/*.html',
+        folders.tmp + '/**/*.{html,shtml,php,xml,json}',
         folders.tmp + '/assets/css/**/*.css',
         folders.tmp + '/assets/js/**/*.js',
         folders.src + '/assets/images/**/*'
@@ -273,7 +294,7 @@ gulp.task('watch', ['default', 'connect'], function() {
     gulp.watch(folders.src + '/assets/scss/**/*.scss', ['sass']);
 
     // Watch .stylus files
-    gulp.watch(folders.src + '/assets/stylus/**/*.stylus', ['stylus']);
+    gulp.watch(folders.src + '/assets/stylus/**/*.styl', ['stylus']);
 
     // Watch .js files
     gulp.watch(folders.src + '/assets/js/**/*.js', ['js']);
